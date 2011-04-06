@@ -96,6 +96,9 @@ EOT
         $output->writeln(sprintf(' > <info>Clear cache and log</info>'));
         $filesystem->remove('app/cache/dev');
         $filesystem->remove('app/logs/dev.log');
+        $output->writeln(sprintf(' > <info>Chmod cache and log</info>'));
+        $filesystem->chmod('app/cache', 0777);
+        $filesystem->chmod('app/logs', 0777);
 
         if ($config->bundles->user || $config->namespaces->user ||
             $config->prefixes->user || $config->repositories->user) {
