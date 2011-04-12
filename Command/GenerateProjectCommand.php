@@ -206,7 +206,8 @@ EOT
         $filesystem->mkdirs($targetBundleDir);
         $filesystem->mirror(__DIR__.'/../Resources/skeleton/bundle', $targetBundleDir);
 
-        $filesystem->rename($targetBundleDir.'/AppBundle.php', $targetBundleDir.'/'.$app.'Bundle.php');
+        $filesystem->rename($targetBundleDir.'/AppBundle.php', $targetBundleDir.'/'.
+                                sprintf('%sBundle.php', $vendor.$app));
 
         if ($controller = $input->getOption('controller')) {
             $filesystem->rename(
@@ -308,7 +309,7 @@ EOT
 
         $app = $input->getArgument('app');
         $vendor = $input->getArgument('vendor');
-        $bundlesCollection->add(new Bundle($app, sprintf('%s\%sBundle', $vendor, $app)));
+        $bundlesCollection->add(new Bundle($vendor.$app, sprintf('%s\%sBundle', $vendor, $app)));
 
         return $bundlesCollection;
     }
@@ -739,11 +740,17 @@ EOT
         $twig_config = ('twig' === $input->getOption('template-engine')) ? $this->loadConfigFile('twig') : '';
         $assetic_config = ($input->getOption('assetic')) ? $this->loadConfigFile('assetic') : '';
         $doctrine_config = ('doctrine' === $input->getOption('orm')) ? $this->loadConfigFile('doctrine') : '';
-        $doctrine_config = str_replace('{{ app }}', $input->getArgument('app'), $doctrine_config);
+        $doctrine_config = str_replace(
+            array('{{ app }}', '{{ namespace }}'), 
+            array($input->getArgument('app'), $input->getArgument('vendor')),
+            $doctrine_config);
         $propel_config = ('propel' === $input->getOption('orm')) ? $this->loadConfigFile('propel') : '';
         $swift_config = ($input->getOption('swiftmailer')) ? $this->loadConfigFile('swiftmailer') : '';
         $routing = ($input->getOption('controller')) ? $this->loadConfigFile('routing') : '';
-        $routing = str_replace('{{ app }}', $input->getArgument('app'), $routing);
+        $routing = str_replace(
+            array('{{ app }}', '{{ namespace }}'),
+            array($input->getArgument('app'), $input->getArgument('vendor')),
+            $routing);
 
         Mustache::renderDir($input->getArgument('path'), array(
             'namespace' => $input->getArgument('vendor'),
